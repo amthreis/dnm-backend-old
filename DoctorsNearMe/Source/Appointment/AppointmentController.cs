@@ -1,84 +1,97 @@
-using System.ComponentModel;
-using Bogus.DataSets;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NetTopologySuite.Geometries;
 
-namespace DoctorsNearMe
+namespace DoctorsNearMe;
+
+[ApiController]
+[Route("appointment")]
+public class AppointmentController : ControllerBase
 {
-    [ApiController]
-    [Route("appointment")]
-    public class AppointmentController : ControllerBase
+    const int PageSize = 10;
+
+    readonly ILogger<AppointmentController> _logger;
+    readonly AppDbContext _ctx;
+
+    public AppointmentController(ILogger<AppointmentController> logger, AppDbContext ctx)
     {
-        const int PageSize = 10;
+        _logger = logger;
+        _ctx = ctx;
+    }
 
-        readonly ILogger<AppointmentController> _logger;
-        readonly AppDbContext _ctx;
+    [HttpGet("all-docs")]
+    public async Task<IActionResult> GetAllD()
+    {
+        return Ok(
+            await _ctx.Doctor
+                .Include(d => d.User)
+                .Include(d => d.Appointments)
+                    .ThenInclude(a => a.Patient)
+                        .ThenInclude(p => p.User)
+                .Select(d => d.ToDoctorWithAppointmentsDto())
+                .ToListAsync()
+        );
+    }
 
-        public AppointmentController(ILogger<AppointmentController> logger, AppDbContext ctx)
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAll()
+    {
+        return Ok(await _ctx.Appointment
+            .AsNoTracking()
+            .Include(a => a.Clinic)
+            .ToListAsync());
+    }
+    
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetById(int id = 1)
+    {
+        var appt = await _ctx.Appointment.SingleOrDefaultAsync(c => c.Id == id);
+
+        if (appt == null)
         {
-            _logger = logger;
-            _ctx = ctx;
+            return BadRequest(new { Error = "Appointment not found" });
         }
 
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAll()
-        {
-            return Ok(await _ctx.Appointment.AsNoTracking().ToListAsync());
-        }
-        
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id = 1)
-        {
-            var appt = await _ctx.Appointment.SingleOrDefaultAsync(c => c.Id == id);
+        return Ok(appt);
+    }
 
-            if (appt == null)
-            {
-                return BadRequest(new { Error = "Appointment not found" });
-            }
+    [HttpPost("create")]
+    public async Task<IActionResult> Create()
+    {
+        var clinic = await _ctx.Clinic.SingleOrDefaultAsync(c => c.Id == 1);
 
-            return Ok(appt);
+        if (clinic == null)
+        {
+            return BadRequest(new { Error = "Clinic not found" });
         }
 
-        [HttpPost("create")]
-        public async Task<IActionResult> Create()
+        await _ctx.Appointment.AddAsync(new Appointment
         {
-            var clinic = await _ctx.Clinic.SingleOrDefaultAsync(c => c.Id == 1);
+            ReviewContent = "Muito bom!",
+            ReviewedAt = DateTime.Now,
+            Clinic = clinic,
+            ReviewScore = ReviewScore.Positive,
+            CreatedAt = DateTime.Now
+        });
 
-            if (clinic == null)
-            {
-                return BadRequest(new { Error = "Clinic not found" });
-            }
+        await _ctx.SaveChangesAsync();
 
-            await _ctx.Appointment.AddAsync(new Appointment
-            {
-                ReviewContent = "Muito bom!",
-                ReviewedAt = DateTime.Now,
-                Clinic = clinic,
-                ReviewScore = ReviewScore.Positive,
-                CreatedAt = DateTime.Now
-            });
+        return Created();
+    }
 
-            await _ctx.SaveChangesAsync();
+    [HttpDelete("delete/{id}")]
+    public async Task<IActionResult> Delete(int id = 1)
+    {
+        var appt = await _ctx.Appointment.SingleOrDefaultAsync(c => c.Id == id);
 
-            return Created();
+        if (appt == null)
+        {
+            return BadRequest(new { Error = "Appointment not found" });
         }
 
-        [HttpDelete("delete/{id}")]
-        public async Task<IActionResult> Delete(int id = 1)
-        {
-            var appt = await _ctx.Appointment.SingleOrDefaultAsync(c => c.Id == id);
+        _ctx.Remove(appt);
 
-            if (appt == null)
-            {
-                return BadRequest(new { Error = "Appointment not found" });
-            }
+        await _ctx.SaveChangesAsync();
 
-            _ctx.Remove(appt);
-
-            await _ctx.SaveChangesAsync();
-
-            return Created();
-        }
+        return Created();
     }
 }

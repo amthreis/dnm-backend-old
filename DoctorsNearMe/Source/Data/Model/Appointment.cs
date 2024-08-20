@@ -1,6 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 
 namespace DoctorsNearMe;
 
@@ -17,6 +19,12 @@ public class Appointment
 
     public Clinic Clinic { get; set; }
 
+    [DeleteBehavior(DeleteBehavior.NoAction)]
+    public Doctor? Doctor { get; set; }
+    
+    [DeleteBehavior(DeleteBehavior.NoAction)]
+    public Patient? Patient { get; set; }
+
     public DateTime CreatedAt { get; set; }
     public DateTime? StartedAt { get; set; }
     public DateTime? CancelledAt { get; set; }
@@ -30,4 +38,5 @@ public class Appointment
     
     [Length(2, 450)]
     public string? ReviewContent { get; set; }
+    
 }

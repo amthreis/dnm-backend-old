@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using DoctorsNearMe;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,6 +10,8 @@ builder.Services.AddControllers()
     .AddJsonOptions(options => {
         options.JsonSerializerOptions.Converters.Add(
             new NetTopologySuite.IO.Converters.GeoJsonConverterFactory());
+
+        //options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.Preserve;
     });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
