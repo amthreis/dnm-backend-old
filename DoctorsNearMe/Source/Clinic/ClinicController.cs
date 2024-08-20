@@ -6,7 +6,7 @@ using NetTopologySuite.Geometries;
 namespace DoctorsNearMe
 {
     [ApiController]
-    [Route("/")]
+    [Route("clinic")]
     public class ClinicController : ControllerBase
     {
         const int PageSize = 10;
@@ -33,7 +33,7 @@ namespace DoctorsNearMe
             
             if (clinic == null)
             {
-                return BadRequest("Clinic not found");
+                return BadRequest(new { Error = "Clinic not found" });
             }
 
             return Ok(clinic);
@@ -76,14 +76,14 @@ namespace DoctorsNearMe
             return Created();
         }
 
-        [HttpPut("{id}/update")]
+        [HttpPut("update/{id}")]
         public async Task<IActionResult> UpdateClinic([FromRoute] int id, CreateOrUpdateClinicDto ucDto)
         {
             var clinic = await _ctx.Clinic.SingleOrDefaultAsync(c => c.Id == id);
             
             if (clinic == null)
             {
-                return BadRequest("Clinic not found");
+                return BadRequest(new { Error = "Clinic not found" });
             }
 
             clinic.Location = ucDto.LongLat.ToPoint();
@@ -94,12 +94,12 @@ namespace DoctorsNearMe
             return Ok(clinic);
         }
 
-        [HttpDelete("delete")]
-        public async Task<IActionResult> Delete(DeleteClinicDto dcDto)
+        [HttpDelete("delete/{id}")]
+        public async Task<IActionResult> Delete(int id = 1)
         {
             _ctx.Clinic.Remove(new Clinic
             {
-                Id = dcDto.Id
+                Id = id
             });
 
             await _ctx.SaveChangesAsync();
