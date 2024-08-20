@@ -16,6 +16,16 @@ public static class AppointmentMapper
         };
     }
 
+    public static AppointmentDto ToAppointmentDto(this Appointment appt)
+    {
+        return new AppointmentDto
+        {
+            Id = appt.Id,
+            Patient = appt.Patient.ToPatientDto(),
+            Doctor = appt.Doctor.ToDoctorDto()
+        };
+    }
+
     public static List<AppointmentOfDoctorDto> ToAppointmentsOfDoctorDto(this List<Appointment> appts)
     {
         return appts.Select(a => a.ToAppointmentOfDoctorDto()).ToList();

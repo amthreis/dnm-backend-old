@@ -18,26 +18,22 @@ public class AppointmentController : ControllerBase
         _ctx = ctx;
     }
 
-    [HttpGet("all-docs")]
-    public async Task<IActionResult> GetAllD()
-    {
-        return Ok(
-            await _ctx.Doctor
-                .Include(d => d.User)
-                .Include(d => d.Appointments)
-                    .ThenInclude(a => a.Patient)
-                        .ThenInclude(p => p.User)
-                .Select(d => d.ToDoctorWithAppointmentsDto())
-                .ToListAsync()
-        );
-    }
 
     [HttpGet("all")]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int? doctorId,
+        [FromQuery] int? patientId
+    )
     {
         return Ok(await _ctx.Appointment
             .AsNoTracking()
-            .Include(a => a.Clinic)
+            .Include(a => a.Doctor)
+                .ThenInclude(d => d.User)
+            .Include(a => a.Patient)
+                .ThenInclude(d => d.User)
+            .Where(a => patientId == null || a.Patient.User.Id == patientId)
+            .Where(a => doctorId == null || a.Doctor.User.Id == doctorId)
+            .Select(a => a.ToAppointmentDto())
             .ToListAsync());
     }
     
