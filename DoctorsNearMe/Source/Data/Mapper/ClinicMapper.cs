@@ -4,7 +4,6 @@ using System.Diagnostics;
 
 public static class ClinicMapper
 {
-    
     public static ClinicNearMeDto ToClinicNearMeDto(this Clinic c, Point from, ILogger logger)
     {
         return new ClinicNearMeDto

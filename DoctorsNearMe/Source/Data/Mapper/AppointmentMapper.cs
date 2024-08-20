@@ -5,6 +5,16 @@ namespace DoctorsNearMe;
 
 public static class AppointmentMapper
 {
+    public static AppointmentDto ToAppointmentDto(this Appointment appt)
+    {
+        return new AppointmentDto
+        {
+            Id = appt.Id,
+            Patient = appt.Patient.ToPatientDto(),
+            Doctor = appt.Doctor.ToDoctorDto()
+        };
+    }
+
     public static AppointmentOfDoctorDto ToAppointmentOfDoctorDto(this Appointment appt)
     {
         return new AppointmentOfDoctorDto
@@ -13,16 +23,6 @@ public static class AppointmentMapper
             Patient = appt.Patient.ToPatientDto(),
             ReviewContent = appt.ReviewContent,
             ReviewScore = appt.ReviewScore
-        };
-    }
-
-    public static AppointmentDto ToAppointmentDto(this Appointment appt)
-    {
-        return new AppointmentDto
-        {
-            Id = appt.Id,
-            Patient = appt.Patient.ToPatientDto(),
-            Doctor = appt.Doctor.ToDoctorDto()
         };
     }
 

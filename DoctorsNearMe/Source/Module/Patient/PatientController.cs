@@ -4,39 +4,25 @@ using Microsoft.EntityFrameworkCore;
 namespace DoctorsNearMe;
 
 [ApiController]
-[Route("doctor")]
-public class DoctorController : ControllerBase
+[Route("patient")]
+public class PatientController : ControllerBase
 {
-    readonly ILogger<DoctorController> _logger;
+    readonly ILogger<PatientController> _logger;
     readonly AppDbContext _ctx;
 
-    public DoctorController(ILogger<DoctorController> logger, AppDbContext ctx)
+    public PatientController(ILogger<PatientController> logger, AppDbContext ctx)
     {
         _logger = logger;
         _ctx = ctx;
     }
 
-    // [HttpGet("all-docs")]
-    // public async Task<IActionResult> GetAllWithAppointments()
-    // {
-    //     return Ok(
-    //         await _ctx.Doctor
-    //             .Include(d => d.User)
-    //             .Include(d => d.Appointments)
-    //                 .ThenInclude(a => a.Patient)
-    //                     .ThenInclude(p => p.User)
-    //             .Select(d => d.ToDoctorWithAppointmentsDto())
-    //             .ToListAsync()
-    //     );
-    // }
-
     [HttpGet("all")]
     public async Task<IActionResult> GetAll()
     {
         return Ok(
-            await _ctx.Doctor
+            await _ctx.Patient
             .Include(d => d.User)
-            .Select(d => d.ToDoctorDto())
+            .Select(d => d.ToPatientDto())
             .ToListAsync()
         );
     }
@@ -51,12 +37,12 @@ public class DoctorController : ControllerBase
             return BadRequest(new { Error = "User not found" });
         }
 
-        if (await _ctx.Doctor.SingleOrDefaultAsync(d => d.User == user) != null)
+        if (await _ctx.Patient.SingleOrDefaultAsync(d => d.User == user) != null)
         {
-            return BadRequest(new { Error = "User is already a Doctor" });
+            return BadRequest(new { Error = "User is already a Patient" });
         }
 
-        await _ctx.Doctor.AddAsync(new Doctor
+        await _ctx.Patient.AddAsync(new Patient
         {
            User = user
         });
@@ -76,12 +62,12 @@ public class DoctorController : ControllerBase
             return BadRequest(new { Error = "User not found" });
         }
 
-        if (await _ctx.Doctor.SingleOrDefaultAsync(d => d.User == user) == null)
+        if (await _ctx.Patient.SingleOrDefaultAsync(d => d.User == user) == null)
         {
             return BadRequest(new { Error = "User NOT a Doctor" });
         }
 
-        _ctx.Doctor.Remove(new Doctor
+        _ctx.Patient.Remove(new Patient
         {
            User = user
         });

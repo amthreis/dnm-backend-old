@@ -88,6 +88,6 @@ public class AppointmentController : ControllerBase
 
         await _ctx.SaveChangesAsync();
 
-        return Created();
+        return NoContent();
     }
 }
