@@ -10,8 +10,8 @@ public static class AppointmentMapper
         return new AppointmentDto
         {
             Id = appt.Id,
-            Patient = appt.Patient.ToPatientDto(),
-            Doctor = appt.Doctor.ToDoctorDto()
+            Patient = appt.Patient?.ToPatientDto() ?? null,
+            Doctor = appt.Doctor?.ToDoctorDto() ?? null
         };
     }
 

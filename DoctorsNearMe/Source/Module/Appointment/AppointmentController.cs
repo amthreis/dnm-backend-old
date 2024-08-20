@@ -25,22 +25,26 @@ public class AppointmentController : ControllerBase
         [FromQuery] int? patientId
     )
     {
+        //_logger.LogCritical($"patientId = {patientId}, doctorId = {doctorId}");
+
         return Ok(await _ctx.Appointment
             .AsNoTracking()
             .Include(a => a.Doctor)
-                .ThenInclude(d => d.User)
+                .ThenInclude(d => d!.User)
             .Include(a => a.Patient)
-                .ThenInclude(d => d.User)
-            .Where(a => patientId == null || a.Patient.User.Id == patientId)
-            .Where(a => doctorId == null || a.Doctor.User.Id == doctorId)
+                .ThenInclude(p => p!.User)
+            .Where(a => 
+                (patientId == null || a.Patient!.User.Id == patientId.Value) 
+                && (doctorId == null || a.Doctor!.User.Id == doctorId.Value)
+            )
             .Select(a => a.ToAppointmentDto())
             .ToListAsync());
     }
     
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id = 1)
+    [HttpGet("{userId}")]
+    public async Task<IActionResult> GetById(int userId = 1)
     {
-        var appt = await _ctx.Appointment.SingleOrDefaultAsync(c => c.Id == id);
+        var appt = await _ctx.Appointment.SingleOrDefaultAsync(c => c.Id == userId);
 
         if (appt == null)
         {
@@ -60,24 +64,26 @@ public class AppointmentController : ControllerBase
             return BadRequest(new { Error = "Clinic not found" });
         }
 
-        await _ctx.Appointment.AddAsync(new Appointment
+        var user = new Appointment
         {
             ReviewContent = "Muito bom!",
             ReviewedAt = DateTime.Now,
             Clinic = clinic,
             ReviewScore = ReviewScore.Positive,
             CreatedAt = DateTime.Now
-        });
+        };
+
+        var app = await _ctx.Appointment.AddAsync(user);
 
         await _ctx.SaveChangesAsync();
 
-        return Created();
+        return CreatedAtAction(nameof(GetById), new { user.Id }, user);
     }
 
-    [HttpDelete("delete/{id}")]
-    public async Task<IActionResult> Delete(int id = 1)
+    [HttpDelete("delete/{userId}")]
+    public async Task<IActionResult> Delete(int userId = 1)
     {
-        var appt = await _ctx.Appointment.SingleOrDefaultAsync(c => c.Id == id);
+        var appt = await _ctx.Appointment.SingleOrDefaultAsync(c => c.Id == userId);
 
         if (appt == null)
         {

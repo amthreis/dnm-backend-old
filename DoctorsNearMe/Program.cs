@@ -1,4 +1,3 @@
-using System.Text.Json.Serialization;
 using DoctorsNearMe;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,7 +38,6 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
-
 
 app.MapControllers();
 
