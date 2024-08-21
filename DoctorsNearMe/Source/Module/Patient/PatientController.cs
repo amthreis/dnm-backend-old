@@ -28,9 +28,9 @@ public class PatientController : ControllerBase
     }
 
     [HttpPost("create")]
-    public async Task<IActionResult> Create(CreateDoctorDto cd)
+    public async Task<IActionResult> Create(CreatePatientDto cp)
     {
-        var user = await _ctx.User.SingleOrDefaultAsync(u => u.Id == cd.UserId);
+        var user = await _ctx.User.SingleOrDefaultAsync(u => u.Id == cp.UserId);
 
         if (user == null)
         {

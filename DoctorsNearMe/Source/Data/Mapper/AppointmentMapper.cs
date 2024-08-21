@@ -11,7 +11,19 @@ public static class AppointmentMapper
         {
             Id = appt.Id,
             Patient = appt.Patient?.ToPatientDto() ?? null,
-            Doctor = appt.Doctor?.ToDoctorDto() ?? null
+            Doctor = appt.Doctor?.ToDoctorDto() ?? null,
+
+            State = appt.State,
+
+            CancelledAt = appt.CancelledAt,
+            CreatedAt = appt.CreatedAt,
+            EndedAt = appt.EndedAt,
+            StartedAt = appt.StartedAt,
+            ReviewedAt = appt.ReviewedAt,
+            ConfirmedAt = appt.ConfirmedAt,
+
+            ReviewContent = appt.ReviewContent,
+            ReviewScore = appt.ReviewScore,
         };
     }
 
